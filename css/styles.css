@@ -475,7 +475,7 @@ section:has(.profile-img) {
 .grid-container {
   width: 100%;
   max-width: 1100px;
-  margin: 0 auto;
+  margin: 0 auto 5rem;
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
