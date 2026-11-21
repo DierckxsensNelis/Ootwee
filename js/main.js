@@ -32,7 +32,6 @@ if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
   requestAnimationFrame(raf);
 }
 
-// Photo lightbox for the photo gallery
 const roomButtons = Array.from(document.querySelectorAll(".room-btn"));
 const lightbox = document.querySelector(".lightbox");
 
@@ -59,7 +58,6 @@ if (lightbox && roomButtons.length) {
   lightbox.querySelector(".lightbox-next").addEventListener("click", () => showPhoto(current + 1));
   lightbox.querySelector(".lightbox-close").addEventListener("click", () => lightbox.close());
 
-  // Click on the dark background closes the lightbox
   lightbox.addEventListener("click", (event) => {
     if (event.target === lightbox) lightbox.close();
   });

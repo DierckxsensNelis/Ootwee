@@ -261,8 +261,6 @@ main {
   max-width: 100%;
 }
 
-/* The logo fills the first screen (centred on the whole screen, header
-   included), so the text starts below the fold */
 main > section:first-child:has(.logo-big) {
   margin-top: 0;
 }
