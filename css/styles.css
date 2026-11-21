@@ -171,12 +171,12 @@ nav .submenu li:only-child a {
   border-radius: 6px;
 }
 
-nav li.has-submenu > a svg {
+nav li.has-submenu > svg {
   transition: transform 0.2s ease;
 }
 
-nav li.has-submenu:hover > a svg,
-nav li.has-submenu:focus-within > a svg {
+nav li.has-submenu:hover > svg,
+nav li.has-submenu:focus-within > svg {
   transform: rotate(180deg);
 }
 
@@ -682,8 +682,8 @@ section:has(.profile-img) {
     border-radius: 0;
   }
 
-  nav li.has-submenu:hover > a svg,
-  nav li.has-submenu:focus-within > a svg {
+  nav li.has-submenu:hover > svg,
+  nav li.has-submenu:focus-within > svg {
     transform: none;
   }
 
