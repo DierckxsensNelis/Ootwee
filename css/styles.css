@@ -91,7 +91,7 @@ nav .has-submenu {
   justify-content: center;
   gap: 0.5em;
   color: var(--ootwee-bordeaux);
-  background-color: rgb(231, 241, 243);
+  background-color: transparent;
   cursor: pointer;
 }
 
@@ -181,6 +181,7 @@ nav li.has-submenu:focus-within > a svg {
 
 a {
   color: var(--ootwee-blauw);
+  background-color: none;
 }
 
 h1,
@@ -244,18 +245,26 @@ main {
   align-items: center;
 }
 
-.logo {
+.logo-link {
   grid-column: 1;
+  justify-self: start;
+  display: flex;
+  align-items: center;
+  padding-left: 1rem;
+}
+
+.logo {
+  display: block;
+  height: 56px;
+  width: auto;
   max-width: 100%;
-  height: auto;
-  width: 180px;
 }
 
 .logo-big {
   max-width: 100%;
   height: auto;
   width: 180px;
-  margin-top: 7rem;
+  margin-top: 1rem;
   margin-bottom: 7rem;
 }
 
@@ -444,8 +453,12 @@ section:has(.profile-img) {
     gap: 1rem;
   }
 
+  .logo-link {
+    padding-left: 0.5rem;
+  }
+
   .logo {
-    width: 120px;
+    height: 44px;
   }
 
   .social-icon {
