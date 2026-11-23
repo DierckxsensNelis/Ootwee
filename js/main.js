@@ -37,18 +37,34 @@ const lightbox = document.querySelector(".lightbox");
 
 if (lightbox && roomButtons.length) {
   const lightboxImg = lightbox.querySelector(".lightbox-img");
+  const lightboxCaption = lightbox.querySelector(".lightbox-caption");
   let current = 0;
 
-  function showPhoto(index) {
+  // Location name for each photo: the nearest .gallery-title before its button.
+  const locations = roomButtons.map((button) => {
+    let el = button.previousElementSibling;
+    while (el && !el.classList.contains("gallery-title")) el = el.previousElementSibling;
+    return el ? el.textContent.trim() : "";
+  });
+
+  function showPhoto(index, opening = false) {
+    const previousLocation = locations[current];
     current = (index + roomButtons.length) % roomButtons.length;
     const img = roomButtons[current].querySelector("img");
     lightboxImg.src = img.currentSrc || img.src;
     lightboxImg.alt = img.alt;
+
+    lightboxCaption.textContent = locations[current];
+    if (!opening && locations[current] !== previousLocation) {
+      lightboxCaption.classList.remove("is-new");
+      void lightboxCaption.offsetWidth; // restart the animation
+      lightboxCaption.classList.add("is-new");
+    }
   }
 
   roomButtons.forEach((button, index) => {
     button.addEventListener("click", () => {
-      showPhoto(index);
+      showPhoto(index, true);
       lightbox.showModal();
       if (window.lenis) window.lenis.stop();
     });
