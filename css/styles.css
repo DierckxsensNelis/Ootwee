@@ -343,8 +343,9 @@ section:has(.profile-img) {
   display: flow-root;
 }
 
-/* own formatting context: text stays beside the floated photo instead of wrapping under it */
-.profile-text {
+/* a paragraph sits either fully beside the photo or fully below it, never wrapping under it halfway;
+   not for Marijke (first bio, right after #wie), whose text keeps wrapping around her photo */
+section:has(.profile-img):not(#wie + section) p {
   display: flow-root;
 }
 
