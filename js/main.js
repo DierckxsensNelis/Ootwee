@@ -3,6 +3,23 @@ window.addEventListener("load", function() {
   images.forEach(img => img.classList.add("loaded"));
 });
 
+function fitProfilePhotos() {
+  document.querySelectorAll(".profile-img").forEach((img) => {
+    img.style.height = img.style.marginBottom = "";
+    if (getComputedStyle(img).float === "none") return; // phone layout: photo sits above the text
+    const natural = img.offsetWidth * 5 / 4;
+    img.style.height = "100000px"; // temporarily put every paragraph beside the photo to measure where each ends
+    const top = img.getBoundingClientRect().top;
+    const ends = [...img.parentElement.querySelectorAll(":scope > p")].map((p) => p.getBoundingClientRect().bottom - top);
+    const options = ends.filter((end) => end >= natural * 0.6); // never shrink the photo to a sliver
+    const pool = options.length ? options : ends.slice(-1);
+    img.style.height = pool.reduce((a, b) => (Math.abs(b - natural) < Math.abs(a - natural) ? b : a)) + "px";
+    img.style.marginBottom = "0"; // the next paragraph's own top margin is the gap below the photo
+  });
+}
+document.fonts.ready.then(fitProfilePhotos);
+window.addEventListener("resize", fitProfilePhotos);
+
 
 const toggle = document.querySelector(".menu-toggle");
 const nav = document.getElementById("main-nav");

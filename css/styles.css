@@ -331,16 +331,24 @@ img {
 
 .profile-img {
   float: left;
-  width: auto;
-  max-height: 300px;
+  width: 240px;
   max-width: 40%;
+  aspect-ratio: 4 / 5;
   object-fit: cover;
-  margin: 0.25rem 2rem 0 0;
-  border-radius: 6px;
+  object-position: center 20%;
+  margin: 0.4rem 2rem 1rem 0;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
 }
 
 section:has(.profile-img) {
   display: flow-root;
+}
+
+section:has(.profile-img) p {
+  display: flow-root;
+  text-wrap: pretty;
+  hyphens: auto;
 }
 
 .room-img {
