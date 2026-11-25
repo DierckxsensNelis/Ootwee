@@ -24,18 +24,46 @@ window.addEventListener("resize", fitProfilePhotos);
 const toggle = document.querySelector(".menu-toggle");
 const nav = document.getElementById("main-nav");
 
-toggle.addEventListener("click", () => {
-  const open = nav.classList.toggle("open");
-  toggle.setAttribute("aria-expanded", open);
-});
+if (toggle && nav) {
+  function setMenu(open) {
+    nav.classList.toggle("open", open);
+    toggle.setAttribute("aria-expanded", open);
+    toggle.setAttribute("aria-label", open ? "Menu sluiten" : "Menu");
+    if (window.lenis) open ? window.lenis.stop() : window.lenis.start();
+  }
 
-// Close the menu after tapping a link
-nav.querySelectorAll("a").forEach((link) => {
-  link.addEventListener("click", () => {
-    nav.classList.remove("open");
-    toggle.setAttribute("aria-expanded", "false");
+  toggle.addEventListener("click", () => setMenu(!nav.classList.contains("open")));
+
+  nav.querySelectorAll(".has-submenu").forEach((group) => {
+    group.setAttribute("role", "button");
+    group.setAttribute("tabindex", "0");
+    group.setAttribute("aria-expanded", "false");
+    const fold = () => {
+      if (!toggle.offsetParent) return;
+      group.setAttribute("aria-expanded", group.classList.toggle("expanded"));
+    };
+    group.addEventListener("click", (event) => {
+      if (!event.target.closest(".submenu")) fold();
+    });
+    group.addEventListener("keydown", (event) => {
+      if (event.target === group && (event.key === "Enter" || event.key === " ")) {
+        event.preventDefault();
+        fold();
+      }
+    });
   });
-});
+
+  nav.querySelectorAll("a").forEach((link) => {
+    link.addEventListener("click", () => setMenu(false));
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && nav.classList.contains("open")) {
+      setMenu(false);
+      toggle.focus();
+    }
+  });
+}
 
 if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
   window.lenis = new Lenis({
@@ -57,7 +85,6 @@ if (lightbox && roomButtons.length) {
   const lightboxCaption = lightbox.querySelector(".lightbox-caption");
   let current = 0;
 
-  // Location name for each photo: the nearest .gallery-title before its button.
   const locations = roomButtons.map((button) => {
     let el = button.previousElementSibling;
     while (el && !el.classList.contains("gallery-title")) el = el.previousElementSibling;
@@ -74,7 +101,7 @@ if (lightbox && roomButtons.length) {
     lightboxCaption.textContent = locations[current];
     if (!opening && locations[current] !== previousLocation) {
       lightboxCaption.classList.remove("is-new");
-      void lightboxCaption.offsetWidth; // restart the animation
+      void lightboxCaption.offsetWidth;
       lightboxCaption.classList.add("is-new");
     }
   }
@@ -87,8 +114,55 @@ if (lightbox && roomButtons.length) {
     });
   });
 
-  lightbox.querySelector(".lightbox-prev").addEventListener("click", () => showPhoto(current - 1));
-  lightbox.querySelector(".lightbox-next").addEventListener("click", () => showPhoto(current + 1));
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let sliding = false;
+
+  async function slide(step, fromX = 0) {
+    if (sliding) return;
+    if (reduceMotion) return showPhoto(current + step);
+    sliding = true;
+    const out = -step * window.innerWidth * 0.6;
+    const leave = lightboxImg.animate(
+      [{ transform: `translateX(${fromX}px)` }, { transform: `translateX(${out}px)`, opacity: 0 }],
+      { duration: 180, easing: "ease-in", fill: "forwards" }
+    );
+    await leave.finished;
+    showPhoto(current + step);
+    await lightboxImg.decode().catch(() => {});
+    lightboxImg.style.transform = "";
+    leave.cancel();
+    await lightboxImg.animate(
+      [{ transform: `translateX(${-out}px)`, opacity: 0 }, { transform: "translateX(0)", opacity: 1 }],
+      { duration: 240, easing: "cubic-bezier(0.2, 0.8, 0.2, 1)" }
+    ).finished;
+    sliding = false;
+  }
+
+  lightbox.querySelector(".lightbox-prev").addEventListener("click", () => slide(-1));
+  lightbox.querySelector(".lightbox-next").addEventListener("click", () => slide(1));
+
+  let swipeStartX = null;
+  let swipeX = 0;
+  lightboxImg.addEventListener("touchstart", (event) => {
+    if (sliding || event.touches.length > 1) return;
+    swipeStartX = event.touches[0].clientX;
+    swipeX = 0;
+  }, { passive: true });
+  lightboxImg.addEventListener("touchmove", (event) => {
+    if (swipeStartX === null) return;
+    swipeX = event.touches[0].clientX - swipeStartX;
+    lightboxImg.style.transform = `translateX(${swipeX}px)`;
+  }, { passive: true });
+  lightboxImg.addEventListener("touchend", () => {
+    if (swipeStartX === null) return;
+    swipeStartX = null;
+    if (Math.abs(swipeX) > 60) return slide(swipeX < 0 ? 1 : -1, swipeX);
+    lightboxImg.animate(
+      [{ transform: `translateX(${swipeX}px)` }, { transform: "translateX(0)" }],
+      { duration: 200, easing: "ease-out" }
+    );
+    lightboxImg.style.transform = "";
+  });
   lightbox.querySelector(".lightbox-close").addEventListener("click", () => lightbox.close());
 
   lightbox.addEventListener("click", (event) => {
@@ -96,8 +170,8 @@ if (lightbox && roomButtons.length) {
   });
 
   lightbox.addEventListener("keydown", (event) => {
-    if (event.key === "ArrowLeft") showPhoto(current - 1);
-    if (event.key === "ArrowRight") showPhoto(current + 1);
+    if (event.key === "ArrowLeft") slide(-1);
+    if (event.key === "ArrowRight") slide(1);
   });
 
   lightbox.addEventListener("close", () => {
