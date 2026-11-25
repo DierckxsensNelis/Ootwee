@@ -300,6 +300,12 @@ main > section:first-child:has(.logo-big) {
   transition: color 0.2s ease;
 }
 
+.social-icon svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
 .social-icon:hover {
   color: #2a6672;
   cursor: pointer;
