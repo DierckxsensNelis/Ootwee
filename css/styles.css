@@ -136,6 +136,12 @@ nav li.has-submenu:focus-within > .submenu {
   transform: translate(-50%, 0);
 }
 
+nav li.has-submenu.just-clicked > .submenu {
+  opacity: 0;
+  visibility: hidden;
+  transform: translate(-50%, -6px);
+}
+
 nav .submenu li {
   display: block;
   margin: 0;
@@ -186,6 +192,10 @@ nav li.has-submenu > svg {
 nav li.has-submenu:hover > svg,
 nav li.has-submenu:focus-within > svg {
   transform: rotate(180deg);
+}
+
+nav li.has-submenu.just-clicked > svg {
+  transform: none;
 }
 
 a {

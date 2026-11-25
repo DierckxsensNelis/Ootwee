@@ -25,8 +25,22 @@ const toggle = document.querySelector(".menu-toggle");
 const nav = document.getElementById("main-nav");
 
 if (toggle && nav) {
+  const groups = nav.querySelectorAll(".has-submenu");
+
   function setMenu(open) {
     nav.classList.toggle("open", open);
+    // group rows act as fold buttons only inside the open phone menu; on desktop a focusable row would keep its hover dropdown open
+    groups.forEach((group) => {
+      if (open) {
+        group.setAttribute("role", "button");
+        group.setAttribute("tabindex", "0");
+        group.setAttribute("aria-expanded", group.classList.contains("expanded"));
+      } else {
+        group.removeAttribute("role");
+        group.removeAttribute("tabindex");
+        group.removeAttribute("aria-expanded");
+      }
+    });
     toggle.setAttribute("aria-expanded", open);
     toggle.setAttribute("aria-label", open ? "Menu sluiten" : "Menu");
     if (window.lenis) open ? window.lenis.stop() : window.lenis.start();
@@ -34,10 +48,7 @@ if (toggle && nav) {
 
   toggle.addEventListener("click", () => setMenu(!nav.classList.contains("open")));
 
-  nav.querySelectorAll(".has-submenu").forEach((group) => {
-    group.setAttribute("role", "button");
-    group.setAttribute("tabindex", "0");
-    group.setAttribute("aria-expanded", "false");
+  groups.forEach((group) => {
     const fold = () => {
       if (!toggle.offsetParent) return;
       group.setAttribute("aria-expanded", group.classList.toggle("expanded"));
@@ -58,6 +69,15 @@ if (toggle && nav) {
       const target = link.hash && document.querySelector(link.hash);
       const fromPhoneMenu = nav.classList.contains("open");
       setMenu(false);
+      if (!fromPhoneMenu) {
+        // desktop: fold the hover dropdown away after a click, until the mouse leaves it
+        const group = link.closest(".has-submenu");
+        if (group) {
+          group.classList.add("just-clicked");
+          group.addEventListener("mouseleave", () => group.classList.remove("just-clicked"), { once: true });
+        }
+        if (nav.contains(document.activeElement)) document.activeElement.blur();
+      }
       if (!fromPhoneMenu || !target) return;
       // the open phone menu locks scrolling, so close it first and then glide to the section ourselves
       event.preventDefault();
