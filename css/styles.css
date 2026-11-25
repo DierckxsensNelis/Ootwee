@@ -343,6 +343,11 @@ section:has(.profile-img) {
   display: flow-root;
 }
 
+/* own formatting context: text stays beside the floated photo instead of wrapping under it */
+.profile-text {
+  display: flow-root;
+}
+
 .room-img {
   width: auto;
   max-width: 100%;
