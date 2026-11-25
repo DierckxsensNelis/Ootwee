@@ -54,7 +54,21 @@ if (toggle && nav) {
   });
 
   nav.querySelectorAll("a").forEach((link) => {
-    link.addEventListener("click", () => setMenu(false));
+    link.addEventListener("click", (event) => {
+      const target = link.hash && document.querySelector(link.hash);
+      const fromPhoneMenu = nav.classList.contains("open");
+      setMenu(false);
+      if (!fromPhoneMenu || !target) return;
+      // the open phone menu locks scrolling, so close it first and then glide to the section ourselves
+      event.preventDefault();
+      event.stopPropagation(); // keep Lenis' own anchor handler from scrolling a second time
+      history.pushState(null, "", link.hash);
+      requestAnimationFrame(() => {
+        const offset = -document.querySelector("header").offsetHeight;
+        if (window.lenis) window.lenis.scrollTo(target, { offset });
+        else target.scrollIntoView({ behavior: "smooth" }); // CSS scroll-padding-top keeps it below the header
+      });
+    });
   });
 
   document.addEventListener("keydown", (event) => {

@@ -640,6 +640,11 @@ section:has(.profile-img) p {
 }
 
 @media (max-width: 1000px) {
+  /* phone: name centred above the centred photo */
+  section:has(.profile-img) > h3 {
+    text-align: center;
+  }
+
   .profile-img {
     float: none;
     display: block;
