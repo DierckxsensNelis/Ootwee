@@ -31,9 +31,6 @@ body {
 }
 
 header {
-  background-color: rgba(231, 241, 243, 0.85);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
   height: var(--header-h);
   width: 100%;
   display: grid;
@@ -44,6 +41,16 @@ header {
   position: sticky;
   top: 0;
   z-index: 100;
+}
+
+header::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-color: rgba(231, 241, 243, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 footer {
@@ -448,6 +455,8 @@ section:has(.profile-img) p {
   object-fit: contain;
   border-radius: 8px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  touch-action: pan-y;
+  user-select: none;
 }
 
 .lightbox button {
@@ -715,21 +724,76 @@ section:has(.profile-img) p {
     grid-column: 3;
   }
 
+  html {
+    scroll-padding-top: var(--header-h);
+  }
+
+  a,
+  button {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .menu-toggle {
+    width: 44px;
+    height: 44px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    transition: background-color 0.2s ease;
+  }
+
+  .menu-toggle:active {
+    background-color: rgba(27, 138, 156, 0.12);
+  }
+
+  .menu-toggle line {
+    transform-origin: center;
+    transition:
+      transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+      opacity 0.2s ease;
+  }
+
+  .menu-toggle[aria-expanded="true"] line:nth-child(1) {
+    opacity: 0;
+  }
+
+  .menu-toggle[aria-expanded="true"] line:nth-child(2) {
+    transform: rotate(45deg) translateY(6px);
+  }
+
+  .menu-toggle[aria-expanded="true"] line:nth-child(3) {
+    transform: rotate(-45deg) translateY(-6px);
+  }
+
   nav {
-    display: none;
-    position: absolute;
-    top: 100%;
+    position: fixed;
+    top: var(--header-h);
     left: 0;
     right: 0;
+    bottom: 0;
     width: 100%;
-    grid-column: 1 / -1;
-    grid-row: 1;
+    display: block;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-bottom: env(safe-area-inset-bottom);
     background-color: #faf9f7;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-12px);
+    transition:
+      opacity 0.25s ease,
+      transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+      visibility 0.25s;
   }
 
   nav.open {
-    display: block;
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+  }
+
+  html:has(nav.open) {
+    overflow: hidden;
   }
 
   nav > ul {
@@ -737,51 +801,117 @@ section:has(.profile-img) p {
     align-items: stretch;
     gap: 0;
     margin: 0;
-    padding: 0.5rem 0;
+    padding: 0.75rem 1.25rem 2rem;
   }
 
-  nav li.has-submenu {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0;
-  }
-
+  /* the three top rows (Psychotherapie, Over ons, Contact) share one style: small blue capitals */
+  nav li.has-submenu,
   nav > ul > li > a {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
     justify-content: space-between;
-    padding: 1rem 1.5rem;
-    font-size: medium;
+    padding: 18px 0.25rem;
+    line-height: 20px;
+    border-bottom: 1px solid #e6ecee;
+    font-size: 0.9rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    color: var(--ootwee-blauw);
+    cursor: pointer;
   }
 
+  nav li.has-submenu > svg,
+  nav li.has-submenu:hover > svg,
+  nav li.has-submenu:focus-within > svg {
+    display: block;
+    width: 12px;
+    height: 8px;
+    transform: none;
+    transition: transform 0.25s ease;
+  }
+
+  nav li.has-submenu.expanded > svg {
+    transform: rotate(180deg);
+  }
+
+  nav li.has-submenu.expanded {
+    padding-bottom: 0;
+  }
+
+  /* a group's links stay folded away until its row is tapped */
   nav .submenu,
   nav li.has-submenu:hover > .submenu,
   nav li.has-submenu:focus-within > .submenu {
+    display: none;
+    flex-basis: 100%;
     position: static;
     min-width: 0;
+    margin: 18px 0 1rem;
     opacity: 1;
-    visibility: visible;
+    visibility: inherit;
     transform: none;
     transition: none;
-    background: transparent;
-    box-shadow: none;
-    border-radius: 0;
+    background: white;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    border-radius: 14px;
+    overflow: hidden;
+    cursor: default;
+  }
+
+  nav li.has-submenu.expanded > .submenu {
+    display: block;
+    animation: submenu-in 0.25s ease;
+  }
+
+  @keyframes submenu-in {
+    from {
+      opacity: 0;
+      transform: translateY(-6px);
+    }
   }
 
   nav .submenu::before {
     display: none;
   }
 
-  nav .submenu a {
-    padding: 0.7rem 1.5rem 0.7rem 2.5rem;
+  nav .submenu li + li {
+    border-top: 1px solid #eef1f2;
+  }
+
+  nav .submenu a,
+  nav .submenu li:first-child a,
+  nav .submenu li:last-child a,
+  nav .submenu li:only-child a {
+    display: flex;
+    align-items: center;
+    min-height: 52px;
+    padding: 0 1rem;
     border-radius: 0;
+    font-size: 1.05rem;
+    font-weight: 400;
+    letter-spacing: normal;
+    text-transform: none;
   }
 
-  nav li.has-submenu:hover > svg,
-  nav li.has-submenu:focus-within > svg {
-    transform: none;
+  nav .submenu a:active {
+    background-color: #f1f6f7;
   }
 
-  nav.open > ul > li.has-submenu > svg {
-    display: none;
+  nav li.has-submenu:active,
+  nav > ul > li > a:active {
+    color: #2a6672;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    nav,
+    .menu-toggle line,
+    nav li.has-submenu > svg {
+      transition: none;
+    }
+
+    nav li.has-submenu.expanded > .submenu {
+      animation: none;
+    }
   }
 }
